@@ -23,18 +23,21 @@
   },
   "homepage": "http://indrimuska.github.io/angular-moment-picker",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack && npm run copy",
     "minify": "webpack && webpack -p",
     "release": "npm run test && webpack --define increase='patch' && webpack -p",
-    "test": "node ./node_modules/karma/bin/karma start"
+    "test": "node ./node_modules/karma/bin/karma start",
+    "copy": "copy .\\dist ..\\angular-phonecat\\app\\angular-moment-picker"
   },
   "dependencies": {
+    "@types/moment-timezone": "^0.5.11",
     "angular": "^1.3",
-    "moment": "^2.16.0"
+    "moment": "^2.16.0",
+    "moment-timezone": "^0.5.23"
   },
   "devDependencies": {
-    "@types/angular": "^1.5.21",
-    "@types/angular-mocks": "^1.5.8",
+    "@types/angular": "^1.6.28",
+    "@types/angular-mocks": "^1.5.10",
     "@types/jasmine": "^2.5.38",
     "@types/node": "^6.0.52",
     "angular-mocks": "^1.6.1",

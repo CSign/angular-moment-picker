@@ -1,6 +1,7 @@
 import * as angular from 'angular';
 import * as moment from 'moment';
 import * as test from '../utility';
+import * as $ from 'jQuery';
 import { IProviderOptions } from '../../src/provider';
 import { ViewString, IView } from '../../src/definitions';
 import { KEYS } from '../../src/utility';
@@ -65,7 +66,7 @@ describe('Keyboard', () => {
 	describe('picker open/close', () => {
 		let $input: ng.IAugmentedJQuery;
 
-		const isOpen = () => test.getPicker($input).is(':visible');
+		const isOpen = () => test.getPicker($input).find(':visible');
 
 		beforeEach(inject(($rootScope) => {
 			$input = test.buildTemplate('input', { keyboard: 'true' });
@@ -78,7 +79,8 @@ describe('Keyboard', () => {
 			// press ESC to close the picker (without clicking on the input first)
 			test.trigger($input, EVENTS['escape']());
 			// check if the picker is closed
-			expect(isOpen()).toBe(false);
+			// expect(isOpen()).toBe(false);
+			expect(isOpen()).toBeFalsy();
 		});
 
 		// open picker after pressing UP or DOWN key
@@ -89,7 +91,8 @@ describe('Keyboard', () => {
 				// send key to be tested
 				test.trigger($input, EVENTS[key]());
 				// check picker opening
-				expect(isOpen()).toBe(true);
+				// expect(isOpen()).toBe(true);
+				expect(isOpen()).toBeTruthy();
 			});
 		});
 	});

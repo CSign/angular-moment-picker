@@ -28,6 +28,8 @@ export interface IDirectiveScope extends ng.IScope {
 	isOpen?: boolean;
 	today?: boolean;
 	keyboard?: boolean;
+	timezone?: string;
+	useStartOfDay?: boolean;
 	additions?: {
 		top?: string;
 		bottom?: string
