@@ -4,39 +4,41 @@ import { getOffset } from './helpers';
 import { IProviderOptions } from './provider';
 import { ViewString, IView, IViewItem, IDirectiveScopeInternal, IModelController } from './definitions';
 import { DecadeView, YearView, MonthView, DayView, HourView, MinuteView } from './views';
-import { isValidMoment, toValue, toMoment, momentToValue, valueToMoment, setValue, updateMoment, KEYS } from './utility';
+import { isValidMoment, toValue, toMoment, momentToValue, valueToMoment, setValue, updateMoment, KEYS, setTimeZone, applyStartOfDayIfApplicable } from './utility';
 
 const templateHtml = require('./template.tpl.html');
 
 export default class Directive implements ng.IDirective {
-	public restrict   = 'A';
-	public require    = '?ngModel';
+	public restrict = 'A';
+	public require = '?ngModel';
 	public transclude = true;
-	public template   = templateHtml;
-	public scope      = {
-		value:       '=?momentPicker',
-		model:       '=?ngModel',
-		locale:      '@?',
-		format:      '@?',
-		minView:     '@?',
-		maxView:     '@?',
-		startView:   '@?',
-		minDate:     '=?',
-		maxDate:     '=?',
-		startDate:   '=?',
-		disabled:    '=?disable',
-		position:    '@?',
-		inline:      '@?',
-		validate:    '=?',
-		autoclose:   '=?',
+	public template = templateHtml;
+	public scope = {
+		value: '=?momentPicker',
+		model: '=?ngModel',
+		locale: '@?',
+		format: '@?',
+		minView: '@?',
+		maxView: '@?',
+		startView: '@?',
+		minDate: '=?',
+		maxDate: '=?',
+		startDate: '=?',
+		disabled: '=?disable',
+		position: '@?',
+		inline: '@?',
+		validate: '=?',
+		autoclose: '=?',
 		setOnSelect: '=?',
-		isOpen:      '=?',
-		today:       '=?',
-		keyboard:    '=?',
-		showHeader:  '=?',
-		additions:   '=?',
-		change:      '&?',
-		selectable:  '&?'
+		isOpen: '=?',
+		today: '=?',
+		keyboard: '=?',
+		showHeader: '=?',
+		additions: '=?',
+		change: '&?',
+		selectable: '&?',
+		timezone: '@?',
+		useStartOfDay: '@?',
 	};
 
 	constructor(
@@ -101,18 +103,18 @@ export default class Directive implements ng.IDirective {
 				// for each view, `$scope.views.formats` object contains the available moment formats
 				// formats present in more views are used to perform min/max view detection (i.e. 'LTS', 'LT', ...)
 				formats: {
-					decade:	'Y{1,2}(?!Y)|YYYY|[Ll]{1,4}(?!T)',
-							/* formats: Y,YY,YYYY,L,LL,LLL,LLLL,l,ll,lll,llll */
-					year:	'M{1,4}(?![Mo])|Mo|Q',
-							/* formats: M,MM,MMM,MMM,Mo,Q */
-					month:	'[Dd]{1,4}(?![Ddo])|DDDo|[Dd]o|[Ww]{1,2}(?![Wwo])|[Ww]o|[Ee]|L{1,2}(?!T)|l{1,2}',
-							/* formats: D,DD,DDD,DDDD,d,dd,ddd,dddd,DDDo,Do,do,W,WW,w,ww,Wo,wo,E,e,L,LL,l,ll */
-					day:	'[Hh]{1,2}|LTS?',
-							/* formats: H,HH,h,hh,LT,LTS */
-					hour:	'm{1,2}|[Ll]{3,4}|LT(?!S)',
-							/* formats: m,mm,LLL,LLLL,lll,llll,LT */
-					minute:	's{1,2}|S{1,}|X|LTS'
-							/* formats: s,ss,S,SS,SSS..,X,LTS */
+					decade: 'Y{1,2}(?!Y)|YYYY|[Ll]{1,4}(?!T)',
+					/* formats: Y,YY,YYYY,L,LL,LLL,LLLL,l,ll,lll,llll */
+					year: 'M{1,4}(?![Mo])|Mo|Q',
+					/* formats: M,MM,MMM,MMM,Mo,Q */
+					month: '[Dd]{1,4}(?![Ddo])|DDDo|[Dd]o|[Ww]{1,2}(?![Wwo])|[Ww]o|[Ee]|L{1,2}(?!T)|l{1,2}',
+					/* formats: D,DD,DDD,DDDD,d,dd,ddd,dddd,DDDo,Do,do,W,WW,w,ww,Wo,wo,E,e,L,LL,l,ll */
+					day: '[Hh]{1,2}|LTS?',
+					/* formats: H,HH,h,hh,LT,LTS */
+					hour: 'm{1,2}|[Ll]{3,4}|LT(?!S)',
+					/* formats: m,mm,LLL,LLLL,lll,llll,LT */
+					minute: 's{1,2}|S{1,}|X|LTS'
+					/* formats: s,ss,S,SS,SSS..,X,LTS */
 				},
 				detectMinMax: () => {
 					$scope.detectedMinView = $scope.detectedMaxView = undefined;
@@ -139,12 +141,12 @@ export default class Directive implements ng.IDirective {
 					$scope.detectedMaxView = $scope.views.all[maxView];
 				},
 				// specific views
-				decade:	new DecadeView	($scope, $ctrl, this.provider),
-				year:	new YearView	($scope, $ctrl, this.provider),
-				month:	new MonthView	($scope, $ctrl, this.provider),
-				day:	new DayView		($scope, $ctrl, this.provider),
-				hour:	new HourView	($scope, $ctrl, this.provider),
-				minute:	new MinuteView	($scope, $ctrl, this.provider),
+				decade: new DecadeView($scope, $ctrl, this.provider),
+				year: new YearView($scope, $ctrl, this.provider),
+				month: new MonthView($scope, $ctrl, this.provider),
+				day: new DayView($scope, $ctrl, this.provider),
+				hour: new HourView($scope, $ctrl, this.provider),
+				minute: new MinuteView($scope, $ctrl, this.provider),
 			};
 			$scope.view = {
 				moment: undefined,
@@ -197,10 +199,10 @@ export default class Directive implements ng.IDirective {
 				},
 				keydown: (e) => {
 					let view: IView = $scope.views[$scope.view.selected],
-						precision   = $scope.views.precisions[$scope.view.selected].replace('date', 'day'),
-						singleUnit  = this.provider[precision + 'sStep'] || 1,
-						operation   = [KEYS.up, KEYS.left].indexOf(e.keyCode) >= 0 ? 'subtract' : 'add',
-						highlight   = (vertical?: boolean) => {
+						precision = ($scope.views.precisions[$scope.view.selected] as string).replace('date', 'day'),
+						singleUnit = this.provider[precision + 'sStep'] || 1,
+						operation = [KEYS.up, KEYS.left].indexOf(e.keyCode) >= 0 ? 'subtract' : 'add',
+						highlight = (vertical?: boolean) => {
 							let unitMultiplier = vertical ? view.perLine : 1,
 								nextDate = $scope.view.moment.clone()[operation](singleUnit * unitMultiplier, precision);
 							if ($scope.limits.isSelectable(nextDate, <moment.unitOfTime.StartOf>precision)) {
@@ -276,9 +278,9 @@ export default class Directive implements ng.IDirective {
 				},
 				change: (view) => {
 					let nextView = $scope.views.all.indexOf(view),
-						minView  = $scope.views.all.indexOf($scope.minView),
-						maxView  = $scope.views.all.indexOf($scope.maxView);
-					
+						minView = $scope.views.all.indexOf($scope.minView),
+						maxView = $scope.views.all.indexOf($scope.maxView);
+
 					const update = () => {
 						setValue($scope.view.moment, $scope, $ctrl, $attrs);
 						$scope.view.update();
@@ -323,6 +325,12 @@ export default class Directive implements ng.IDirective {
 			$scope.limits.checkView();
 			// model controller is initialized after linking function
 			this.$timeout(() => {
+
+				if ($ctrl.$modelValue && moment.isMoment($ctrl.$modelValue)) {
+					$ctrl.$modelValue = setTimeZone($ctrl.$modelValue, $scope.timezone);
+					$ctrl.$modelValue = applyStartOfDayIfApplicable($ctrl.$modelValue, $scope.useStartOfDay, $scope.maxView);
+				}
+
 				if ($attrs['ngModel']) {
 					if (!$ctrl.$modelValue && $scope.value) $ctrl.$setViewValue($scope.value);
 					$ctrl.$commitViewValue();
@@ -430,8 +438,8 @@ export default class Directive implements ng.IDirective {
 			// use `touchstart` for iOS Safari, where click events aren't propogated under most circumstances.
 			$scope.input
 				.on('focus click touchstart', () => $scope.$evalAsync($scope.view.open))
-				.on('blur',        			  () => $scope.$evalAsync($scope.view.close))
-				.on('keydown',     			  (e) => { if ($scope.keyboard) $scope.view.keydown(e); });
+				.on('blur', () => $scope.$evalAsync($scope.view.close))
+				.on('keydown', (e) => { if ($scope.keyboard) $scope.view.keydown(e); });
 			$element.on('click touchstart', () => focusInput());
 			$scope.container.on('mousedown', (e: JQueryEventObject) => focusInput(e));
 			angular.element(this.$window).on('resize scroll', $scope.view.position);

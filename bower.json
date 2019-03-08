@@ -28,7 +28,9 @@
     "tests"
   ],
   "dependencies": {
+    "@types/moment-timezone": "^0.5.11",
     "angular": "^1.3",
-    "moment": "^2.16.0"
+    "moment": "^2.16.0",
+    "moment-timezone": "^0.5.23"
   }
 }

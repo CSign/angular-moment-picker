@@ -1,5 +1,6 @@
 import * as angular from 'angular';
 import * as moment from 'moment';
+
 import { Value, IDirectiveScopeInternal, IModelController, ViewString } from './definitions';
 
 export const KEYS = { up: 38, down: 40, left: 37, right: 39, escape: 27, enter: 13 };
@@ -35,7 +36,7 @@ export const valueToMoment = (formattedValue: Value, $scope: IDirectiveScopeInte
 		const views = $scope.views.all.slice(0, $scope.views.all.indexOf($scope.detectedMinView));
 		angular.forEach(views, (view: ViewString) => {
 			const precision = $scope.views.precisions[view];
-			momentValue[precision]($scope.model[precision]());
+			momentValue[precision as string]($scope.model[precision as string]());
 		});
 	}
 	return momentValue;
@@ -61,9 +62,26 @@ export const updateMoment = (model: moment.Moment, value: moment.Moment, $scope:
 			const views = $scope.views.all.slice(0, $scope.views.all.indexOf($scope.detectedMaxView) + 1);
 			angular.forEach(views, (view: ViewString) => {
 				const precision = $scope.views.precisions[view];
-				model[precision](value[precision]());
+				model[precision as string](value[precision as string]());
 			});
 		}
+	}
+
+	model = setTimeZone(model, $scope.timezone);
+	model = applyStartOfDayIfApplicable(model, $scope.useStartOfDay, $scope.maxView);
+	return model;
+};
+
+export const setTimeZone = (model: moment.Moment, timezone: string): moment.Moment => {
+	if (timezone !== null) {
+		model.tz(timezone, true);
+	}
+	return model;
+};
+
+export const applyStartOfDayIfApplicable = (model: moment.Moment, useStartOfDay: boolean, maxView: string): moment.Moment => {
+	if (!!useStartOfDay && maxView && maxView.match(/decade|year|month/)) {
+		model.startOf('day');
 	}
 	return model;
 };

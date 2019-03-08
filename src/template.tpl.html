@@ -1,13 +1,15 @@
 <div class="moment-picker">
     <div class="moment-picker-container {{view.selected}}-view"
-         ng-class="{'moment-picker-disabled': disabled, open: view.isOpen}">
+        ng-class="{'moment-picker-disabled': disabled, open: view.isOpen}">
         <div ng-if="additions.top" class="moment-picker-addition top"></div>
         <table class="header-view" ng-if="showHeader">
             <thead>
                 <tr>
-                    <th ng-class="{disabled: !view.previous.selectable}" ng-bind-html="view.previous.label" ng-click="view.previous.set()"></th>
+                    <th ng-class="{disabled: !view.previous.selectable}" ng-bind-html="view.previous.label"
+                        ng-click="view.previous.set()"></th>
                     <th ng-bind="view.title" ng-click="view.setParentView()"></th>
-                    <th ng-class="{disabled: !view.next.selectable}" ng-bind-html="view.next.label" ng-click="view.next.set()"></th>
+                    <th ng-class="{disabled: !view.next.selectable}" ng-bind-html="view.next.label"
+                        ng-click="view.next.set()"></th>
                 </tr>
             </thead>
         </table>

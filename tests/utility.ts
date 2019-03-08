@@ -6,7 +6,7 @@ let $compile, $timeout, $rootScope;
 export const bootstrap = (): any => { // tslint:disable-line:no-any
 	// load the moment-picker module, which contains the directive
 	beforeEach(angular.mock.module('moment-picker'));
-	
+
 	// store references to $rootScope and $compile
 	// so they are available to all tests in this describe block
 	beforeEach(inject((
@@ -35,9 +35,11 @@ export const buildTemplate = (tag: string, options?: any, content?: any, $scope?
 	if (tag === 'input' && !options.ngModel) options.ngModel = 'mpTestMomentObject';
 	angular.forEach(options, (value, name) => {
 		let valueStr = name;
-		if (typeof value === 'string') valueStr = value;
+		if (typeof value === 'string') {
+			valueStr = value as any;
+		}
 		else $scope[name] = value;
-		template += ' ' + name.replace(/([A-Z])/g, '-$1').toLowerCase() + '="' + valueStr + '"';
+		template += ' ' + name.toString().replace(/([A-Z])/g, '-$1').toLowerCase() + '="' + valueStr + '"';
 	});
 	// close template
 	template += tag === 'input' ? '>' : '></div>';
@@ -62,6 +64,7 @@ export const getPicker = (element: ng.IAugmentedJQuery) => (<IDirectiveScopeInte
 // wrap jquery trigger fn: event trigger + digest stimulation
 export const trigger = (element: ng.IAugmentedJQuery, event: string | JQueryEventObject) => {
 	// use jquey trigger method to propagate event to parent nodes
-	angular.element(element).trigger(<string>event);
+	// angular.element(element).trigger(<string>event);
+	angular.element(element).triggerHandler(<string>event);
 	$digest();
 };
